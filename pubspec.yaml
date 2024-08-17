@@ -1,0 +1,21 @@
+name: an_toast
+description: "A Flutter toast library with usage identical to Android."
+version: 0.1.0
+homepage: https://github.com/aymtools/an_toast
+topics:
+  - toast
+
+environment:
+  sdk: '>=2.17.0 <4.0.0'
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cancellable: ^2.0.1
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+
+flutter:
+
