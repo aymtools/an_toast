@@ -167,7 +167,7 @@ class ToastManager {
 
   void _peekToast() {
     if (_overlayState == null || !_overlayState!.mounted) {
-      _overlayState = findOverlayState?.call() ?? _findOverlayState();
+      _overlayState = findOverlayState.call();
       if (_overlayState == null || !_overlayState!.mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) => _peekToast());
         return;

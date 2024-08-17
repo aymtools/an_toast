@@ -38,7 +38,7 @@ class _ToastDemoState extends State<ToastDemo> {
 }
 ```
 
-See [example](https://github.com/aymtools/an_toast/blob/master/example/example.dart)
+See [example](https://github.com/aymtools/an_toast/blob/main/example/example.dart)
 for detailed.
 
 ## Issues
