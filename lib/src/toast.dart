@@ -4,7 +4,7 @@ import 'package:cancellable/cancellable.dart';
 import 'package:flutter/material.dart';
 
 import 'cancellable_timer.dart';
-import 'toast_widget.dart';
+import 'toast_anim_widget.dart';
 
 class _ToastTask {
   final Widget Function(BuildContext context, int duration) builder;
@@ -60,7 +60,7 @@ class _ToastTask {
           Builder(builder: (context) => this.builder(context, _duration));
 
       toast = Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 27),
         child: Center(
           child: toast,
         ),
@@ -99,7 +99,7 @@ class _ToastTask {
   }
 }
 
-/// 可以管理 toast 的默认配置信息
+/// 可以管理 全局 toast 的默认配置信息
 class ToastManager {
   static const int DURATION_SHORT = 1000;
   static const int DURATION_LONG = 3000;
@@ -108,6 +108,7 @@ class ToastManager {
 
   static final ToastManager _instance = ToastManager._();
 
+  // 唯一实例
   static ToastManager get instance => _instance;
 
   ///是否立即展示最新的toast 之前的toast将会立即结束或跳过展示
@@ -123,10 +124,13 @@ class ToastManager {
   OverlayState? Function() findOverlayState = _findOverlayState;
 
   final Queue<_ToastTask> _toastQueue = Queue<_ToastTask>();
+
+  /// 自定义全局的toast的出现动画
   Widget Function(BuildContext context, int duration, Widget toastWidget)
       toastAnimateBuilder = (_, d, t) => AnimationToastWidget(
             animationDuration: d,
             child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 24),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: const Color(0xFF000000).withOpacity(0.75),

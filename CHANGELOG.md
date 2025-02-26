@@ -1,3 +1,7 @@
+## 0.2.0
+
+* Add documentation and usage instructions.
+
 ## 0.1.0
 
 * A Flutter toast library with usage identical to Android.
