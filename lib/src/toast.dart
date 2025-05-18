@@ -101,7 +101,10 @@ class _ToastTask {
 
 /// 可以管理 全局 toast 的默认配置信息
 class ToastManager {
+  // ignore: constant_identifier_names
   static const int DURATION_SHORT = 1000;
+
+  // ignore: constant_identifier_names
   static const int DURATION_LONG = 3000;
 
   ToastManager._();
@@ -190,7 +193,7 @@ class ToastManager {
 
 OverlayState? _findOverlayState() {
   try {
-    final rootElement = WidgetsBinding.instance.renderViewElement;
+    final rootElement = WidgetsBinding.instance.rootElement;
     if (rootElement != null) {
       NavigatorState? navigator = _findStateForChildren(rootElement);
       if (navigator != null && navigator.mounted) {
@@ -212,13 +215,17 @@ T? _findStateForChildren<T extends State>(Element element) {
 
 /// 唯一 对象
 class ToastCompanion {
+  // ignore: non_constant_identifier_names
   final int DURATION_SHORT = ToastManager.DURATION_SHORT;
+
+  // ignore: non_constant_identifier_names
   final int DURATION_LONG = ToastManager.DURATION_LONG;
 
   const ToastCompanion._();
 }
 
-/// Toast的默认对象 来模拟Android的static效果
+// Toast的默认对象 来模拟Android的static效果
+// ignore: constant_identifier_names
 const ToastCompanion Toast = ToastCompanion._();
 
 extension ToastCompanionDefShow on ToastCompanion {

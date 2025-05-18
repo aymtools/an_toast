@@ -1,3 +1,3 @@
-library an_toast;
+library;
 
 export 'src/toast.dart';
