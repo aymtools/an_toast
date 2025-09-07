@@ -1,3 +1,7 @@
+## 0.4.0
+
+* Automatically detect the app's visibility and pause the toast timer when the app is not visible.
+
 ## 0.3.0
 
 * Upgrading Dependencies.
