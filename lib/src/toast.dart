@@ -152,7 +152,8 @@ class ToastManager {
               margin: const EdgeInsets.symmetric(vertical: 24),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF000000).withOpacity(0.75),
+                color: const Color(0xC0000000),
+                // Color(0xFF000000).withOpacity(0.75)
                 borderRadius: const BorderRadius.all(Radius.circular(12)),
               ),
               child: DefaultTextStyle.merge(
