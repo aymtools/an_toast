@@ -1,3 +1,8 @@
+## 1.0.0
+
+* Added ToastManager.useLifecycleTimer, which uses a lifecycle-aware timer that pauses when the app
+  is not visible.
+
 ## 0.3.0
 
 * Upgrading Dependencies.

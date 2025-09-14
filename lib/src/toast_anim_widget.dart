@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:an_toast/src/lifecycle_timer.dart';
+import 'package:an_toast/src/toast.dart';
 import 'package:flutter/material.dart';
 
 /// 默认的附带动画的效果的toast
@@ -26,6 +30,8 @@ class _AnimationToastWidgetState extends State<AnimationToastWidget>
 
   bool _isDisposed = false;
 
+  late final Timer _timer;
+
   @override
   void initState() {
     super.initState();
@@ -52,17 +58,27 @@ class _AnimationToastWidgetState extends State<AnimationToastWidget>
     controllerShowAnim.forward();
     controllerShowOffset.forward();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: widget.animationDuration - 500))
-          .then((_) {
-        if (!_isDisposed) controllerHide.forward();
-      });
-    });
+    void timeFinish() {
+      if (!_isDisposed) controllerHide.forward();
+    }
+
+    final totalDuration =
+        Duration(milliseconds: widget.animationDuration - 500);
+    if (ToastManager.instance.useLifecycleTimer) {
+      _timer = LifecycleCountdownTimer(
+          interval: Duration(milliseconds: 20),
+          totalDuration: totalDuration,
+          onFinishCallback: timeFinish)
+        ..start();
+    } else {
+      _timer = Timer(totalDuration, timeFinish);
+    }
   }
 
   @override
   void dispose() {
     _isDisposed = true;
+    _timer.cancel();
     controllerShowAnim.dispose();
     controllerShowOffset.dispose();
     controllerHide.dispose();

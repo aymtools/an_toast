@@ -1,6 +1,6 @@
 name: an_toast
 description: "A Flutter toast library with usage identical to Android would provide a simple API for displaying toast messages in Flutter."
-version: 0.3.0
+version: 1.0.0
 homepage: https://github.com/aymtools/an_toast
 topics:
   - toast
@@ -12,10 +12,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cancellable: ^2.0.1
+  cancellable: ^2.3.1
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
+  flutter_lints: any
 
 flutter:
 

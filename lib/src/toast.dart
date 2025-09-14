@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:collection';
 
+import 'package:an_toast/src/lifecycle_timer.dart';
 import 'package:cancellable/cancellable.dart';
 import 'package:flutter/material.dart';
 
@@ -10,21 +12,23 @@ class _ToastTask {
   final Widget Function(BuildContext context, int duration) builder;
 
   final int _duration;
+  final bool _useLifecycleTimer;
 
   final ToastGravity gravity;
   late final OverlayEntry _toastOverlay = _makeToastOverlay();
 
   final Cancellable _activeCancellable;
 
-  CancellableTimer? _timer;
+  Timer? _timer;
 
   bool get isActive => _timer != null && _timer!.isActive;
 
-  _ToastTask(this.builder, this._duration, void Function() onFinish,
-      Cancellable? cancellable, this.gravity)
-      : _activeCancellable = Cancellable() {
+  _ToastTask(this.builder, this._duration, this._useLifecycleTimer,
+      void Function() onFinish, Cancellable? cancellable, this.gravity)
+      : _activeCancellable =
+            cancellable?.makeCancellable(infectious: true) ?? Cancellable() {
     _activeCancellable.onCancel.then((value) => onFinish());
-    cancellable?.bindCancellable(_activeCancellable);
+    // cancellable?.bindCancellable(_activeCancellable);
   }
 
   void run(OverlayState overlayState) {
@@ -41,8 +45,17 @@ class _ToastTask {
     }
 
     overlayState.insert(_toastOverlay);
-    _timer = CancellableTimer(
-        Duration(milliseconds: _duration), finishTimer, finishTimer);
+
+    if (_useLifecycleTimer) {
+      _timer = LifecycleCountdownTimer(
+          interval: Duration(milliseconds: 100),
+          totalDuration: Duration(milliseconds: _duration),
+          onFinishCallback: finishTimer)
+        ..start();
+    } else {
+      _timer = CancellableTimer(
+          Duration(milliseconds: _duration), finishTimer, finishTimer);
+    }
   }
 
   void cancel() {
@@ -117,6 +130,9 @@ class ToastManager {
   ///是否立即展示最新的toast 之前的toast将会立即结束或跳过展示
   bool immediately = true;
 
+  /// 使用与生命周期相关的计时器 当app不可见时会暂停计时器
+  bool useLifecycleTimer = true;
+
   /// 默认的 toast 的展示位置
   ToastGravity gravity = ToastGravity.bottom;
 
@@ -136,7 +152,8 @@ class ToastManager {
               margin: const EdgeInsets.symmetric(vertical: 24),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF000000).withOpacity(0.75),
+                color: const Color(0xC0000000),
+                // Color(0xFF000000).withOpacity(0.75)
                 borderRadius: const BorderRadius.all(Radius.circular(12)),
               ),
               child: DefaultTextStyle.merge(
@@ -164,8 +181,8 @@ class ToastManager {
       _peekToast();
     }
 
-    toast = _ToastTask(builder, duration ?? this.duration, taskFinish,
-        cancellable, gravity ?? this.gravity);
+    toast = _ToastTask(builder, duration ?? this.duration, useLifecycleTimer,
+        taskFinish, cancellable, gravity ?? this.gravity);
     _toastQueue.addLast(toast);
     _peekToast();
   }
@@ -215,17 +232,25 @@ T? _findStateForChildren<T extends State>(Element element) {
 
 /// 唯一 对象
 class ToastCompanion {
+  ///  默认的 toast 的展示时间 短时间 1s
   // ignore: non_constant_identifier_names
   final int DURATION_SHORT = ToastManager.DURATION_SHORT;
 
+  ///  默认的 toast 的展示时间 长时间 3s
   // ignore: non_constant_identifier_names
   final int DURATION_LONG = ToastManager.DURATION_LONG;
+
+  ///  默认的 toast 的展示时间 短时间 1s
+  final int durationShort = ToastManager.DURATION_LONG;
+
+  ///  默认的 toast 的展示时间 长时间 3s
+  final int durationLong = ToastManager.DURATION_LONG;
 
   const ToastCompanion._();
 }
 
 // Toast的默认对象 来模拟Android的static效果
-// ignore: constant_identifier_names
+// ignore: constant_identifier_names, non_constant_identifier_names
 const ToastCompanion Toast = ToastCompanion._();
 
 extension ToastCompanionDefShow on ToastCompanion {
