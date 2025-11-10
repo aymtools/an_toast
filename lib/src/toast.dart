@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'cancellable_timer.dart';
 import 'toast_anim_widget.dart';
 
+typedef ToastMessageWidgetBuilder = Widget Function(
+    BuildContext context, String message, Widget? icon, Axis axis);
+
 class _ToastTask {
   final Widget Function(BuildContext context, int duration) builder;
 
@@ -142,6 +145,10 @@ class ToastManager {
   /// 用来自定义toast显示的 overlay 的寄存器
   OverlayState? Function() findOverlayState = _findOverlayState;
 
+  /// 定义如何将 String 的 message 转换为widget
+  ToastMessageWidgetBuilder messageWidgetBuilder =
+      (_, message, __, ___) => Text(message);
+
   final Queue<_ToastTask> _toastQueue = Queue<_ToastTask>();
 
   /// 自定义全局的toast的出现动画
@@ -256,11 +263,19 @@ const ToastCompanion Toast = ToastCompanion._();
 extension ToastCompanionDefShow on ToastCompanion {
   /// 展示普通的toast内容
   void show(String message,
-          {int? duration,
+          {Widget? icon,
+          Axis axis = Axis.horizontal,
+          int? duration,
           ToastGravity? gravity,
           void Function()? onDismiss,
           Cancellable? cancellable}) =>
-      showWidget(Text(message),
+      showWidgetBuilder(
+          (context, duration) => ToastManager.instance.toastAnimateBuilder(
+                context,
+                duration,
+                ToastManager.instance
+                    .messageWidgetBuilder(context, message, icon, axis),
+              ),
           duration: duration,
           gravity: gravity,
           onDismiss: onDismiss,
