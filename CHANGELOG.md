@@ -1,3 +1,7 @@
+## 1.1.0
+
+* Customize the display style of string messages.
+
 ## 1.0.0
 
 * Added ToastManager.useLifecycleTimer, which uses a lifecycle-aware timer that pauses when the app
