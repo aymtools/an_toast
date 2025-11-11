@@ -4,6 +4,7 @@ import 'dart:collection';
 import 'package:an_toast/src/lifecycle_timer.dart';
 import 'package:cancellable/cancellable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'cancellable_timer.dart';
 import 'toast_anim_widget.dart';
@@ -203,6 +204,14 @@ class ToastManager {
         WidgetsBinding.instance.addPostFrameCallback((_) => _peekToast());
         return;
       }
+    }
+
+    /// 因为需要插入overlay，所以需要等待空闲时   才插入时
+    final phase = SchedulerBinding.instance.schedulerPhase;
+    if (phase != SchedulerPhase.idle &&
+        phase != SchedulerPhase.postFrameCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => _peekToast());
+      return;
     }
     if (_toastQueue.isNotEmpty) {
       var curr = _toastQueue.first;
