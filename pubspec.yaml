@@ -1,6 +1,6 @@
 name: an_toast
 description: "A Flutter toast library with usage identical to Android would provide a simple API for displaying toast messages in Flutter."
-version: 1.1.0
+version: 1.1.1
 homepage: https://github.com/aymtools/an_toast
 topics:
   - toast

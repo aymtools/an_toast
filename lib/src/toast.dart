@@ -21,31 +21,47 @@ class _ToastTask {
   final ToastGravity gravity;
   late final OverlayEntry _toastOverlay = _makeToastOverlay();
 
-  final Cancellable _activeCancellable;
+  final Cancellable? _activeCancellable;
+  final void Function() onFinish;
 
   Timer? _timer;
+
+  bool _disposed = false;
 
   bool get isActive => _timer != null && _timer!.isActive;
 
   _ToastTask(this.builder, this._duration, this._useLifecycleTimer,
-      void Function() onFinish, Cancellable? cancellable, this.gravity)
-      : _activeCancellable =
-            cancellable?.makeCancellable(infectious: true) ?? Cancellable() {
-    _activeCancellable.onCancel.then((value) => onFinish());
+      this.onFinish, Cancellable? cancellable, this.gravity)
+      : _activeCancellable = cancellable {
+    _activeCancellable?.onCancel.then((value) => _callFinish());
     // cancellable?.bindCancellable(_activeCancellable);
   }
 
-  void run(OverlayState overlayState) {
-    if (_activeCancellable.isUnavailable) return;
-    finishTimer() {
-      if (_activeCancellable.isUnavailable) {
-        return;
-      }
-      _activeCancellable.cancel();
+  void _callFinish() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    if (_timer != null) {
       try {
         _toastOverlay.remove();
       } catch (_) {}
-      _timer = null;
+      if (_timer?.isActive == true) {
+        _timer?.cancel();
+      }
+    }
+    _timer = null;
+
+    _activeCancellable?.cancel();
+
+    try {
+      onFinish();
+    } catch (_) {}
+  }
+
+  void run(OverlayState overlayState) {
+    if (_disposed) {
+      return;
     }
 
     overlayState.insert(_toastOverlay);
@@ -54,21 +70,17 @@ class _ToastTask {
       _timer = LifecycleCountdownTimer(
           interval: Duration(milliseconds: 100),
           totalDuration: Duration(milliseconds: _duration),
-          onFinishCallback: finishTimer)
+          onFinishCallback: _callFinish,
+          onCancelCallback: _callFinish)
         ..start();
     } else {
       _timer = CancellableTimer(
-          Duration(milliseconds: _duration), finishTimer, finishTimer);
+          Duration(milliseconds: _duration), _callFinish, _callFinish);
     }
   }
 
   void cancel() {
-    if (_activeCancellable.isUnavailable) return;
-    if (_timer == null) {
-      _activeCancellable.cancel();
-    } else {
-      _timer?.cancel();
-    }
+    _callFinish();
   }
 
   OverlayEntry _makeToastOverlay() {
@@ -228,6 +240,10 @@ OverlayState? _findOverlayState() {
   try {
     final rootElement = WidgetsBinding.instance.rootElement;
     if (rootElement != null) {
+      // OverlayState? overlayState = _findStateForChildren(rootElement);
+      // if (overlayState != null && overlayState.mounted) {
+      //   return overlayState;
+      // }
       NavigatorState? navigator = _findStateForChildren(rootElement);
       if (navigator != null && navigator.mounted) {
         return navigator.overlay;

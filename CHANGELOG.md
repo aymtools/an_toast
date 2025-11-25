@@ -1,3 +1,7 @@
+## 1.1.1
+
+* Fix a bug where a toast might not disappear when it is canceled using a cancellable.
+
 ## 1.1.0
 
 * Customize the display style of string messages.

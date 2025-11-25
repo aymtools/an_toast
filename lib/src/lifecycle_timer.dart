@@ -11,7 +11,9 @@ abstract class BaseLifecycleTimer implements Timer {
   final Stopwatch _stopwatch = Stopwatch();
   int _tickCount = 0;
 
-  BaseLifecycleTimer(this.interval) {
+  final void Function()? onCancelCallback;
+
+  BaseLifecycleTimer(this.interval, this.onCancelCallback) {
     TimerManager.instance._addTimer(this);
   }
 
@@ -47,7 +49,7 @@ abstract class BaseLifecycleTimer implements Timer {
   @override
   void cancel() {
     pause();
-    onFinish();
+    onCancelCallback?.call();
     TimerManager.instance._removeTimer(this);
   }
 
@@ -80,7 +82,8 @@ class LifecycleTimer extends BaseLifecycleTimer {
     required Duration interval,
     this.onTickCallback,
     this.onFinishCallback,
-  }) : super(interval);
+    void Function()? onCancelCallback,
+  }) : super(interval, onCancelCallback);
 
   @override
   void onTick() => onTickCallback?.call(elapsed);
@@ -102,7 +105,8 @@ class LifecycleCountdownTimer extends BaseLifecycleTimer {
     required this.totalDuration,
     this.onTickCallback,
     this.onFinishCallback,
-  }) : super(interval);
+    void Function()? onCancelCallback,
+  }) : super(interval, onCancelCallback);
 
   @override
   void onTick() {
