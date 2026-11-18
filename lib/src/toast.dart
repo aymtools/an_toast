@@ -72,7 +72,7 @@ class _ToastTask {
 
     if (_useLifecycleTimer) {
       _timer = LifecycleCountdownTimer(
-          interval: Duration(milliseconds: 100),
+          interval: const Duration(milliseconds: 100),
           totalDuration: Duration(milliseconds: _duration),
           onFinishCallback: _callFinish,
           onCancelCallback: _callFinish)
@@ -182,10 +182,10 @@ class ToastManager {
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 24),
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xC0000000),
+              decoration: const BoxDecoration(
+                color: Color(0xC0000000),
                 // Color(0xFF000000).withOpacity(0.75)
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
               child: DefaultTextStyle.merge(
                   style: const TextStyle(

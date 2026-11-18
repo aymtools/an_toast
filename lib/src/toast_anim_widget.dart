@@ -66,7 +66,7 @@ class _AnimationToastWidgetState extends State<AnimationToastWidget>
         Duration(milliseconds: widget.animationDuration - 500);
     if (ToastManager.instance.useLifecycleTimer) {
       _timer = LifecycleCountdownTimer(
-          interval: Duration(milliseconds: 20),
+          interval: const Duration(milliseconds: 20),
           totalDuration: totalDuration,
           onFinishCallback: timeFinish)
         ..start();
