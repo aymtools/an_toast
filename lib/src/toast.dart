@@ -3,11 +3,15 @@ import 'dart:collection';
 
 import 'package:an_toast/src/lifecycle_timer.dart';
 import 'package:cancellable/cancellable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 
 import 'cancellable_timer.dart';
 import 'toast_anim_widget.dart';
+
+// 自行定义等效常量（与 Material 规范完全一致），摆脱对 material.dart 的依赖
+const double _kDefaultToolbarHeight = 56.0;
+const double _kDefaultBottomNavigationBarHeight = 56.0;
 
 typedef ToastMessageWidgetBuilder = Widget Function(
     BuildContext context, String message, Widget? icon, Axis axis);
@@ -95,9 +99,15 @@ class _ToastTask {
         ),
       );
 
-      toast = Material(
-        type: MaterialType.transparency,
-        color: Colors.transparent,
+      // 2. 用 DefaultTextStyle 替代透明 Material
+      // 注意：外层已经包了 IgnorePointer，所以内部绝对不可能有点击水波纹交互，替换 100% 安全！
+      toast = DefaultTextStyle(
+        style: const TextStyle(
+          color: Color(0xFFFFFFFF),
+          fontSize: 14.0,
+          fontWeight: FontWeight.normal,
+          decoration: TextDecoration.none, // 消除 Overlay 默认黄色双下划线
+        ),
         child: toast,
       );
 
@@ -106,16 +116,17 @@ class _ToastTask {
       toast = IgnorePointer(
         child: toast,
       );
+
       switch (gravity) {
         case ToastGravity.top:
-          toast =
-              Positioned(top: kToolbarHeight, left: 0, right: 0, child: toast);
+          toast = Positioned(
+              top: _kDefaultToolbarHeight, left: 0, right: 0, child: toast);
           break;
         case ToastGravity.center:
           break;
         case ToastGravity.bottom:
           toast = Positioned(
-              bottom: kBottomNavigationBarHeight,
+              bottom: _kDefaultBottomNavigationBarHeight,
               left: 0,
               right: 0,
               child: toast);
@@ -177,7 +188,10 @@ class ToastManager {
                 borderRadius: const BorderRadius.all(Radius.circular(12)),
               ),
               child: DefaultTextStyle.merge(
-                  style: const TextStyle(color: Colors.white), child: t),
+                  style: const TextStyle(
+                    color: Color(0xFFFFFFFF),
+                  ),
+                  child: t),
             ),
           );
 

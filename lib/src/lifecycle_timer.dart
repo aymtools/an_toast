@@ -19,9 +19,9 @@ abstract class BaseLifecycleTimer implements Timer {
 
   /// 启动
   void start() {
-    if (_stopwatch.isRunning) return;
+    if (_ticker != null) return;
     _stopwatch.start();
-    _ticker ??= Timer.periodic(interval, (_) {
+    _ticker = Timer.periodic(interval, (_) {
       _tickCount++;
       onTick();
     });
@@ -29,7 +29,7 @@ abstract class BaseLifecycleTimer implements Timer {
 
   /// 暂停
   void pause() {
-    if (!_stopwatch.isRunning) return;
+    if (_ticker == null) return;
     _stopwatch.stop();
     _ticker?.cancel();
     _ticker = null;
@@ -37,9 +37,9 @@ abstract class BaseLifecycleTimer implements Timer {
 
   /// 恢复
   void resume() {
-    if (_stopwatch.isRunning) return;
+    if (_ticker != null) return;
     _stopwatch.start();
-    _ticker ??= Timer.periodic(interval, (_) {
+    _ticker = Timer.periodic(interval, (_) {
       _tickCount++;
       onTick();
     });
@@ -54,11 +54,15 @@ abstract class BaseLifecycleTimer implements Timer {
   }
 
   /// 已流逝时间
-  Duration get elapsed => _stopwatch.elapsed;
+  Duration get elapsed {
+    final swElapsed = _stopwatch.elapsed;
+    final tickElapsed = interval * _tickCount;
+    return swElapsed > tickElapsed ? swElapsed : tickElapsed;
+  }
 
   /// Timer 接口：是否仍然活跃
   @override
-  bool get isActive => _stopwatch.isRunning;
+  bool get isActive => _ticker != null && _ticker!.isActive;
 
   /// Timer 接口：tick 次数
   @override
@@ -115,6 +119,7 @@ class LifecycleCountdownTimer extends BaseLifecycleTimer {
       onTickCallback?.call(remaining);
     } else {
       onTickCallback?.call(Duration.zero);
+      onFinish();
       cancel();
     }
   }

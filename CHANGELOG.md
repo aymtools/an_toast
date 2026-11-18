@@ -1,3 +1,7 @@
+## 1.1.2
+
+* Remove dependency on flutter/material.dart.
+
 ## 1.1.1
 
 * Fix a bug where a toast might not disappear when it is canceled using a cancellable.

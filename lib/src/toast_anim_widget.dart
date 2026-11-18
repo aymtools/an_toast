@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:an_toast/src/lifecycle_timer.dart';
 import 'package:an_toast/src/toast.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 /// 默认的附带动画的效果的toast
 class AnimationToastWidget extends StatefulWidget {
