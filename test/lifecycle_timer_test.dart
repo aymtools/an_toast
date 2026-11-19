@@ -80,6 +80,26 @@ void main() {
       expect(timer.isActive, isFalse);
     });
 
+    test('LifecycleCountdownTimer natural finish does not invoke onCancelCallback', () async {
+      bool finished = false;
+      bool cancelCalled = false;
+
+      final timer = LifecycleCountdownTimer(
+        interval: const Duration(milliseconds: 20),
+        totalDuration: const Duration(milliseconds: 60),
+        onFinishCallback: () => finished = true,
+        onCancelCallback: () => cancelCalled = true,
+      );
+
+      timer.start();
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // 验证自然结束时调用了 onFinishCallback，但未触发 onCancelCallback
+      expect(finished, isTrue);
+      expect(cancelCalled, isFalse);
+      expect(timer.isActive, isFalse);
+    });
+
     test('TimerManager responds to app lifecycle state changes', () async {
       int tickCount = 0;
 

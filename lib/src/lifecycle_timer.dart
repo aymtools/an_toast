@@ -45,7 +45,7 @@ abstract class BaseLifecycleTimer implements Timer {
     });
   }
 
-  /// 提前结束（等价于 cancel）
+  /// 提前取消
   @override
   void cancel() {
     pause();
@@ -69,10 +69,8 @@ abstract class BaseLifecycleTimer implements Timer {
   int get tick => _tickCount;
 
   /// 子类实现：每 tick 执行
+  @protected
   void onTick();
-
-  /// 子类实现：结束时执行
-  void onFinish();
 }
 
 /// ======================
@@ -80,20 +78,16 @@ abstract class BaseLifecycleTimer implements Timer {
 /// ======================
 class LifecycleTimer extends BaseLifecycleTimer {
   final void Function(Duration elapsed)? onTickCallback;
-  final void Function()? onFinishCallback;
 
   LifecycleTimer({
     required Duration interval,
     this.onTickCallback,
-    this.onFinishCallback,
     void Function()? onCancelCallback,
   }) : super(interval, onCancelCallback);
 
   @override
+  @protected
   void onTick() => onTickCallback?.call(elapsed);
-
-  @override
-  void onFinish() => onFinishCallback?.call();
 }
 
 /// ======================
@@ -113,19 +107,22 @@ class LifecycleCountdownTimer extends BaseLifecycleTimer {
   }) : super(interval, onCancelCallback);
 
   @override
+  @protected
   void onTick() {
     final remaining = totalDuration - elapsed;
     if (remaining > Duration.zero) {
       onTickCallback?.call(remaining);
     } else {
       onTickCallback?.call(Duration.zero);
-      onFinish();
-      cancel();
+      _finish();
     }
   }
 
-  @override
-  void onFinish() => onFinishCallback?.call();
+  void _finish() {
+    pause();
+    onFinishCallback?.call();
+    TimerManager.instance._removeTimer(this);
+  }
 }
 
 /// ======================
