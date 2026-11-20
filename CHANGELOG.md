@@ -1,6 +1,11 @@
+## 1.2.0
+
+* Add customizable `ToastThemeProvider` (`themeProvider`) to isolate `flutter/material.dart` dependency.
+
 ## 1.1.2
 
-* Remove dependency on flutter/material.dart.
+* Remove dependency on `flutter/material.dart`.
+* Fix an issue where `LifecycleCountdownTimer` falsely triggered `onCancelCallback` upon natural countdown completion.
 
 ## 1.1.1
 

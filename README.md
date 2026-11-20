@@ -67,6 +67,21 @@ class _ToastDemoState extends State<ToastDemo> {
 }
 ```
 
+## Custom Theme Provider (Material Independence)
+
+By default, `an_toast` uses `materialThemeProvider`. If your application does not use `package:flutter/material.dart` (such as a pure `WidgetsApp` or Cupertino app), you can configure `defaultThemeProvider` globally or per toast call:
+
+```dart
+// Global configuration
+ToastManager.instance.themeProvider = defaultThemeProvider;
+
+// Or per toast call
+Toast.show(
+  'Pure WidgetsApp Toast',
+  themeProvider: defaultThemeProvider,
+);
+```
+
 See [example](https://github.com/aymtools/an_toast/blob/main/example/example.dart)
 for detailed.
 

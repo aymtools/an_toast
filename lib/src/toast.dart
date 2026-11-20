@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:an_toast/src/lifecycle_timer.dart';
+import 'package:an_toast/src/material_support.dart';
 import 'package:cancellable/cancellable.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -16,6 +17,8 @@ const double _kDefaultBottomNavigationBarHeight = 56.0;
 typedef ToastMessageWidgetBuilder = Widget Function(
     BuildContext context, String message, Widget? icon, Axis axis);
 
+typedef ToastThemeProvider = Widget Function({required Widget child});
+
 class _ToastTask {
   final Widget Function(BuildContext context, int duration) builder;
 
@@ -23,6 +26,9 @@ class _ToastTask {
   final bool _useLifecycleTimer;
 
   final ToastGravity gravity;
+
+  final ToastThemeProvider themeProvider;
+
   late final OverlayEntry _toastOverlay = _makeToastOverlay();
 
   final Cancellable? _activeCancellable;
@@ -35,7 +41,7 @@ class _ToastTask {
   bool get isActive => _timer != null && _timer!.isActive;
 
   _ToastTask(this.builder, this._duration, this._useLifecycleTimer,
-      this.onFinish, Cancellable? cancellable, this.gravity)
+      this.onFinish, Cancellable? cancellable, this.gravity, this.themeProvider)
       : _activeCancellable = cancellable {
     _activeCancellable?.onCancel.then((value) => _callFinish());
     // cancellable?.bindCancellable(_activeCancellable);
@@ -99,17 +105,7 @@ class _ToastTask {
         ),
       );
 
-      // 2. 用 DefaultTextStyle 替代透明 Material
-      // 注意：外层已经包了 IgnorePointer，所以内部绝对不可能有点击水波纹交互，替换 100% 安全！
-      toast = DefaultTextStyle(
-        style: const TextStyle(
-          color: Color(0xFFFFFFFF),
-          fontSize: 14.0,
-          fontWeight: FontWeight.normal,
-          decoration: TextDecoration.none, // 消除 Overlay 默认黄色双下划线
-        ),
-        child: toast,
-      );
+      toast = themeProvider(child: toast);
 
       toast = SafeArea(child: toast);
 
@@ -173,6 +169,10 @@ class ToastManager {
   ToastMessageWidgetBuilder messageWidgetBuilder =
       (_, message, __, ___) => Text(message);
 
+  ///用来提供toast的默认的主题信息
+  // ignore: deprecated_member_use_from_same_package
+  ToastThemeProvider themeProvider = materialThemeProvider;
+
   final Queue<_ToastTask> _toastQueue = Queue<_ToastTask>();
 
   /// 自定义全局的toast的出现动画
@@ -200,7 +200,8 @@ class ToastManager {
       {int? duration,
       ToastGravity? gravity,
       void Function()? onDismiss,
-      Cancellable? cancellable}) {
+      Cancellable? cancellable,
+      ToastThemeProvider? themeProvider}) {
     assert(() {
       if (duration != null && duration < 1) {
         assert(false, 'showToast duration must >0');
@@ -215,8 +216,14 @@ class ToastManager {
       _peekToast();
     }
 
-    toast = _ToastTask(builder, duration ?? this.duration, useLifecycleTimer,
-        taskFinish, cancellable, gravity ?? this.gravity);
+    toast = _ToastTask(
+        builder,
+        duration ?? this.duration,
+        useLifecycleTimer,
+        taskFinish,
+        cancellable,
+        gravity ?? this.gravity,
+        themeProvider ?? this.themeProvider);
     _toastQueue.addLast(toast);
     _peekToast();
   }
@@ -307,7 +314,8 @@ extension ToastCompanionDefShow on ToastCompanion {
           int? duration,
           ToastGravity? gravity,
           void Function()? onDismiss,
-          Cancellable? cancellable}) =>
+          Cancellable? cancellable,
+          ToastThemeProvider? themeProvider}) =>
       showWidgetBuilder(
           (context, duration) => ToastManager.instance.toastAnimateBuilder(
                 context,
@@ -318,21 +326,24 @@ extension ToastCompanionDefShow on ToastCompanion {
           duration: duration,
           gravity: gravity,
           onDismiss: onDismiss,
-          cancellable: cancellable);
+          cancellable: cancellable,
+          themeProvider: themeProvider);
 
   /// 自定义的toast 使用默认的动画效果
   void showWidget(Widget messageWidget,
           {int? duration,
           ToastGravity? gravity,
           void Function()? onDismiss,
-          Cancellable? cancellable}) =>
+          Cancellable? cancellable,
+          ToastThemeProvider? themeProvider}) =>
       showWidgetBuilder(
           (context, duration) => ToastManager.instance
               .toastAnimateBuilder(context, duration, messageWidget),
           duration: duration,
           gravity: gravity,
           onDismiss: onDismiss,
-          cancellable: cancellable);
+          cancellable: cancellable,
+          themeProvider: themeProvider);
 
   /// 完全自定义的toast 包含自定义动画效果
   void showWidgetBuilder(
@@ -340,12 +351,14 @@ extension ToastCompanionDefShow on ToastCompanion {
       {int? duration,
       ToastGravity? gravity,
       void Function()? onDismiss,
-      Cancellable? cancellable}) {
+      Cancellable? cancellable,
+      ToastThemeProvider? themeProvider}) {
     ToastManager.instance.showToast(messageWidgetBuilder,
         duration: duration,
         gravity: gravity,
         onDismiss: onDismiss,
-        cancellable: cancellable);
+        cancellable: cancellable,
+        themeProvider: themeProvider);
   }
 }
 
